@@ -1,0 +1,8 @@
+/.env
+/ApexPlayer.db
+/apex_app.py
+/apex_TRN.py
+/api.json
+/settings.py
+/test.db
+/__pycache__
