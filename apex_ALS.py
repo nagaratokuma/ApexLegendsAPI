@@ -9,7 +9,7 @@ conn = sqlite3.connect(dbname, isolation_level=None)#データベースを作成
 
 cursor = conn.cursor() #カーソルオブジェクトを作成
 # テーブル作成
-sql = """CREATE TABLE IF NOT EXISTS PlayerSheet(isExist text, name text primary key, uid text, platform text, addDate text, updateDate text, rank text, currentState text)"""
+sql = """CREATE TABLE IF NOT EXISTS PlayerSheet(name text primary key, count integer, level text, uid text, platform text, addDate text, updateDate text, rank text, currentState text)"""
 cursor.execute(sql)
 conn.commit()
 
@@ -33,14 +33,14 @@ if st.button('API呼び出し'):
     # resにErrorが含まれている場合
     if 'Error' in res:
         st.write('このプレイヤーはApexLegendsStatusで見つかりませんでした')
-        isExist = 'notFound'
         uid = ''
         rank = ''
         currentState = ''
+        level = ''
         
     else:
-        isExist = 'found'
         uid = res['global']['uid']
+        level = res['global']['level']
         st.write('Success')
         # テーブルにREPLACEでデータを1行追加
         # banされているとき
@@ -58,11 +58,13 @@ if st.button('API呼び出し'):
     # すでにテーブルに存在するか確認
     sql = """SELECT * FROM PlayerSheet WHERE name = ?"""
     data = (player_name,)
-    result_df = pd.read_sql(sql, conn, params=data)
-    if len(result_df) != 0:
+    result = cursor.execute(sql, data)
+    playerdata = result.fetchone()
+    if playerdata is not None:
         #存在するとき
-        sql = """UPDATE PlayerSheet SET updateDate = ? WHERE name = ?"""
-        data = (datetime.now().strftime('%Y/%m/%d %H:%M:%S'), player_name)
+        count = playerdata[1] + 1
+        sql = """UPDATE PlayerSheet SET count = ?, level = ?, updateDate = ?, rank = ?, currentState = ? WHERE name = ?"""
+        data = (count, level, datetime.now().strftime('%Y/%m/%d %H:%M:%S'), rank, currentState, player_name)
         cursor.execute(sql, data)
         st.write('データを更新しました')
         #playerデータを表示
@@ -73,16 +75,14 @@ if st.button('API呼び出し'):
         
     else:
         #存在しないとき
-        sql = """REPLACE INTO PlayerSheet VALUES(?, ?, ?, ?, ?, ?, ?, ?)"""
-        data = (isExist, player_name, uid, platform, datetime.now().strftime('%Y/%m/%d %H:%M:%S'), datetime.now().strftime('%Y/%m/%d %H:%M:%S'), rank, currentState)
+        sql = """REPLACE INTO PlayerSheet VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)"""
+        data = (player_name, 1, level, uid, platform, datetime.now().strftime('%Y/%m/%d %H:%M:%S'), datetime.now().strftime('%Y/%m/%d %H:%M:%S'), rank, currentState)
         cursor.execute(sql, data)
         st.write('データベースに新規登録しました')
     
         
         
     #(isExist text, name text primary key, platform text, addDate datetime, updateDate datetime, lastLiveDate datetime, rank text, currentState text)
-    # 結果表示
-    st.write(res)
 
     # データベースからデータを取得
     sql = """SELECT * FROM PlayerSheet"""
