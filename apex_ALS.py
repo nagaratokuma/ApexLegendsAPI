@@ -16,7 +16,7 @@ conn.commit()
 base_url = "https://api.mozambiquehe.re/bridge?auth=e359f24291059eac45953627ccadd929&player="
 
 # タイトル
-st.title('ApexLegends')
+st.title('ApexLegendsチーターデータベース')
 
 # プレイヤーネームテキストボックス
 player_name = st.text_input('OriginIDを入力してください')
