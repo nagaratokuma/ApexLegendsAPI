@@ -28,7 +28,7 @@ platform = st.selectbox('プラットフォームを選択してください',('
 url = base_url + player_name + "&platform=" + platform
 
 # API呼び出しボタン
-if st.button('API呼び出し'):
+if st.button('検索'):
     res = requests.get(url).json()
     # resにErrorが含まれている場合
     if 'Error' in res:
@@ -89,7 +89,9 @@ if st.button('API呼び出し'):
     df = pd.read_sql(sql, conn)
     st.dataframe(df)
 
-
+sql = """SELECT * FROM PlayerSheet"""
+df = pd.read_sql(sql, conn)
+st.dataframe(df)
 
 #作業完了したらDB接続を閉じる
 conn.close()
